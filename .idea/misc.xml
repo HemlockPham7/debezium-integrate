@@ -5,6 +5,7 @@
     <option name="originalFiles">
       <list>
         <option value="$PROJECT_DIR$/servicefrommysql/pom.xml" />
+        <option value="$PROJECT_DIR$/servicefromhtwo/pom.xml" />
       </list>
     </option>
   </component>
