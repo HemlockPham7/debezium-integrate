@@ -26,3 +26,18 @@ services:
     environment:
       KAFKA_ADVERTISED_HOST_NAME: localhost
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+
+  debezium:
+    image: debezium/connect:2.7.3.Final
+    container_name: debezium
+    environment:
+      - BOOTSTRAP_SERVERS=kafka:9092
+      - GROUP_ID=1
+      - CONFIG_STORAGE_TOPIC=dbz_config
+      - OFFSET_STORAGE_TOPIC=dbz_offset
+      - STATUS_STORAGE_TOPIC=dbz_status
+    ports:
+      - "8083:8083" # Port for Kafka Connect REST API
+    depends_on:
+      - kafka
+      - mysql
