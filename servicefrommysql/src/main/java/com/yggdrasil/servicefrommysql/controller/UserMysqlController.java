@@ -46,4 +46,9 @@ public class UserMysqlController {
     public void delete(@PathVariable Long id) {
         userMysqlService.delete(id);
     }
+
+    @PostMapping("/synch/{id}")
+    public void synchronousUserDatabase(@PathVariable Long id) {
+        userMysqlService.synchUserById(id);
+    }
 }

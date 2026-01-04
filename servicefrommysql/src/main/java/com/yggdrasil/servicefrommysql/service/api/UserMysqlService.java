@@ -17,5 +17,9 @@ public interface UserMysqlService {
 
     void delete(Long id);
 
+    void updateStatus(Long id, Integer newStatus);
+
     List<UserMysqlDTO> find();
+
+    void synchUserById(Long id);
 }

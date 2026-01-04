@@ -1,10 +1,12 @@
 package com.yggdrasil.servicefrommysql.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yggdrasil.servicefrommysql.dto.UserMysqlDTO;
 import com.yggdrasil.servicefrommysql.entity.UserMysql;
 import com.yggdrasil.servicefrommysql.repository.UserMysqlRepository;
 import com.yggdrasil.servicefrommysql.service.api.UserMysqlService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,7 +15,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserMysqlServiceImpl implements UserMysqlService {
 
+    private final KafkaTemplate<String, String> kafkaTemplate;
     private final UserMysqlRepository userRepository;
+    private final ObjectMapper objectMapper;
 
     @Override
     public UserMysqlDTO create(UserMysqlDTO dto) {
@@ -63,6 +67,34 @@ public class UserMysqlServiceImpl implements UserMysqlService {
                 .stream()
                 .map(this::toDTO)
                 .toList();
+    }
+
+    @Override
+    public void updateStatus(Long id, Integer newStatus) {
+        UserMysql user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setStatus(newStatus);
+
+        userRepository.save(user);
+    }
+
+    @Override
+    public void synchUserById(Long id) {
+        UserMysql userMysql = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        UserMysqlDTO userMysqlDTO = toDTO(userMysql);
+
+        try {
+            String userJson = objectMapper.writeValueAsString(userMysqlDTO);
+            kafkaTemplate.send("user-topic", userJson);
+        } catch (Exception e) {
+            throw new RuntimeException("Error serializing user data for Kafka", e);
+        }
+
+        userMysql.setStatus(1);
+        userRepository.save(userMysql);
     }
 
     private UserMysqlDTO toDTO(UserMysql userMysql) {
