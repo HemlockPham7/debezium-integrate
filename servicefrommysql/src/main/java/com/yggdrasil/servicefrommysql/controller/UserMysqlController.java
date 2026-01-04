@@ -1,7 +1,7 @@
 package com.yggdrasil.servicefrommysql.controller;
 
-import com.yggdrasil.servicefrommysql.dto.UserDTO;
-import com.yggdrasil.servicefrommysql.service.api.CrudUserService;
+import com.yggdrasil.servicefrommysql.dto.UserMysqlDTO;
+import com.yggdrasil.servicefrommysql.service.api.UserMysqlService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,35 +15,35 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/usersql")
 @RequiredArgsConstructor
-public class UserController {
+public class UserMysqlController {
 
-    private final CrudUserService crudUserService;
+    private final UserMysqlService userMysqlService;
 
     @PostMapping
-    public UserDTO create(@RequestBody UserDTO dto) {
-        return crudUserService.create(dto);
+    public UserMysqlDTO create(@RequestBody UserMysqlDTO dto) {
+        return userMysqlService.create(dto);
     }
 
     @PutMapping("/{id}")
-    public UserDTO update(@PathVariable Long id,
-                          @RequestBody UserDTO dto) {
-        return crudUserService.update(id, dto);
+    public UserMysqlDTO update(@PathVariable Long id,
+                               @RequestBody UserMysqlDTO dto) {
+        return userMysqlService.update(id, dto);
     }
 
     @GetMapping("/{id}")
-    public UserDTO getById(@PathVariable Long id) {
-        return crudUserService.getById(id);
+    public UserMysqlDTO getById(@PathVariable Long id) {
+        return userMysqlService.getById(id);
     }
 
     @GetMapping
-    public List<UserDTO> getAll() {
-        return crudUserService.getAll();
+    public List<UserMysqlDTO> getAll() {
+        return userMysqlService.getAll();
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
-        crudUserService.delete(id);
+        userMysqlService.delete(id);
     }
 }

@@ -1,6 +1,6 @@
 package com.yggdrasil.servicefrommysql.dto;
 
-public record UserDTO(
+public record UserMysqlDTO(
         Long id,
         String name,
         String email
