@@ -63,6 +63,26 @@
 			<artifactId>spring-kafka-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/io.debezium/debezium-api -->
+		<dependency>
+			<groupId>io.debezium</groupId>
+			<artifactId>debezium-api</artifactId>
+			<version>3.2.1.Final</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/io.debezium/debezium-embedded -->
+		<dependency>
+			<groupId>io.debezium</groupId>
+			<artifactId>debezium-embedded</artifactId>
+			<version>3.2.1.Final</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/io.debezium/debezium-connector-postgres -->
+		<dependency>
+			<groupId>io.debezium</groupId>
+			<artifactId>debezium-connector-postgres</artifactId>
+			<version>3.2.1.Final</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
