@@ -22,7 +22,7 @@ public class UserSyncScheduler {
 
     private final ObjectMapper objectMapper;
 
-    @Scheduled(fixedRate = 60000)
+//    @Scheduled(fixedRate = 60000)
     @Transactional
     public void process() throws JsonProcessingException {
         log.info("Processing ==========> Started");
