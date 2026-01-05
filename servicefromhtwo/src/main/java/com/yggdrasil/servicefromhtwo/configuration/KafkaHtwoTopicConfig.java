@@ -12,6 +12,7 @@ public class KafkaHtwoTopicConfig {
     public NewTopic topic() {
         return TopicBuilder.name("user-topic")
                 .partitions(2)
+                .replicas(1)
                 .build();
     }
 }
