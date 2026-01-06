@@ -1,0 +1,14 @@
+[mysqld]
+
+# ========== REQUIRED ==========
+server-id=184054
+log-bin=mysql-bin
+binlog_format=ROW
+binlog_row_image=FULL
+
+# ========== BINLOG RETENTION ==========
+binlog_expire_logs_seconds=864000
+
+# ========== GTID (RECOMMENDED) ==========
+gtid_mode=ON
+enforce_gtid_consistency=ON

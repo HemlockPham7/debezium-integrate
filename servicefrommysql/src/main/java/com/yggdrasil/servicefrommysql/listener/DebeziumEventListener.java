@@ -11,6 +11,7 @@ import io.debezium.engine.format.ChangeEventFormat;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.connect.data.Field;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.json.JSONObject;
@@ -19,7 +20,9 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -58,73 +61,62 @@ public class DebeziumEventListener {
         log.info("SourceRecordKey: {}", sourceRecordKey);
         log.info("SourceRecordValue: {}", sourceRecordValue);
 
-        String source = sourceRecordValue.get("after").toString();
+        final String op = sourceRecordValue.schema().fields().stream()
+                .anyMatch(f -> f.name().equals("op")) ? (String) sourceRecordValue.get("op") : null;
 
-        source = source.replaceFirst("Struct", "");
-        source = source.replaceFirst("\\(", "");
-        source = source.substring(0, source.length() - 1);
+        if (op == null) {
+            log.info("This is not a row change event (maybe DDL or snapshot metadata), skipping...");
+            return;
+        }
 
-        log.info("Source: {}", source);
+        // Handle 'after' field only if it's an actual row change event
+        Struct afterStruct = (Struct) sourceRecordValue.get("after");
+        if (afterStruct == null) {
+            log.info("After struct is null (maybe a delete event), skipping...");
+            return;
+        }
 
-        source = handle(splitString(source));
+        log.info("afterStruct: {}", afterStruct);
+
+        // Convert the 'after' struct to a map (key-value pairs)
+        Map<String, Object> afterMap = new HashMap<>();
+        for (Field field : afterStruct.schema().fields()) {
+            afterMap.put(field.name(), afterStruct.get(field));
+        }
+
+        // Convert map to JSON string for further processing
+        String json;
+        try {
+            json = new ObjectMapper().writeValueAsString(afterMap);
+        } catch (JsonProcessingException e) {
+            log.error("Error while converting 'after' struct to JSON", e);
+            return;
+        }
+
+        log.info("After JSON: {}", json);
 
         UserMysql userOutbox = null;
         try {
-            userOutbox = objectMapper.readValue(source, UserMysql.class);
+            userOutbox = objectMapper.readValue(json, UserMysql.class);
             kafkaTemplate.send("user-topic", objectMapper.writeValueAsString(userOutbox));
         } catch (JsonProcessingException e) {
+            log.error("Error while deserializing JSON to UserMysql object", e);
             throw new RuntimeException(e);
         }
 
         log.info("User Outbox Log: {}", userOutbox);
     }
 
-    public static String handle(List<String> components) {
-        JSONObject jsonObject = new JSONObject();
-        for (String component : components) {
-            String[] keyValue = component.split("=");
-            jsonObject.put(keyValue[0], keyValue[1]);
-        }
-        return jsonObject.toString();
-    }
-
-    public static List<String> splitString(String input) {
-        List<String> components = new ArrayList<>();
-
-        StringBuilder builder = new StringBuilder();
-        int curlyBraceCount = 0;
-
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
-
-            if (c == '{') {
-                curlyBraceCount++;
-            } else if (c == '}') {
-                curlyBraceCount--;
-            }
-
-            if (c == ',' && curlyBraceCount == 0) {
-                components.add(builder.toString().trim());
-                builder.setLength(0);
-            } else {
-                builder.append(c);
-            }
-        }
-
-        components.add(builder.toString().trim());
-        return components;
-    }
-
 
     @PostConstruct
     private void start() {
-        log.info("Starting");
+        log.info("==============> Starting");
         this.executor.execute(debeziumEngine);
     }
 
     @PreDestroy
     private void stop() throws IOException {
-        log.info("Stop");
+        log.info("==============> Stop");
         if (this.debeziumEngine != null) {
             this.debeziumEngine.close();
         }
