@@ -3,7 +3,7 @@ version: '3.8'
 services:
   mysql:
     image: mysql:8.0
-    container_name: mysql
+    container_name: debezium-poc-mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: testmysqlDB
@@ -11,19 +11,26 @@ services:
       MYSQL_PASSWORD: password
     ports:
       - "3306:3306"
+    volumes:
+      - ./init_mysql.sql:/docker-entrypoint-initdb.d/init_mysql.sql
+      - mysql_data:/var/lib/mysql
+    networks:
+      - mynetwork
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.10
-    container_name: zookeeper
+    container_name: debezium-poc-zookeeper
     ports:
       - "2181:2181"
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - mynetwork
 
   kafka:
     image: confluentinc/cp-kafka:7.4.10
-    container_name: kafka
+    container_name: debezium-poc-kafka
     ports:
       - "9092:9092"
       - "29092:29092"
@@ -36,3 +43,20 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     depends_on:
       - zookeeper
+    networks:
+      - mynetwork
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: debezium-poc-kafka-ui
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    ports:
+      - "9089:8080"
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
+    driver: bridge
