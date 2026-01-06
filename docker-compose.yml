@@ -13,6 +13,7 @@ services:
       - "3306:3306"
     volumes:
       - ./init_mysql.sql:/docker-entrypoint-initdb.d/init_mysql.sql
+      - mysql_data:/var/lib/mysql
     networks:
       - mynetwork
 
@@ -53,8 +54,8 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
     ports:
       - "9089:8080"
-    depends_on:
-      - kafka
+    networks:
+      - mynetwork
 
   debezium:
     image: debezium/connect:2.7.3.Final
