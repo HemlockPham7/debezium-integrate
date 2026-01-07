@@ -18,17 +18,17 @@ public class Consumer {
     private final UserHtwoRepository userHtwoRepository;
     private final ObjectMapper objectMapper;
 
-    @KafkaListener(topics = "user-topic", groupId = "user-group")
+    @KafkaListener(topics = "dbserver1.inventory.user_mysql", groupId = "user-group")
     public void consumeMessage(String message) throws JsonProcessingException {
         log.info("Consume message: " + message);
 
-        UserHtwoDTO userDTO = objectMapper.readValue(message, UserHtwoDTO.class);
-
-        UserHtwo userHtwo = UserHtwo.builder()
-                .name(userDTO.name())
-                .email(userDTO.email())
-                .build();
-
-        userHtwoRepository.save(userHtwo);
+//        UserHtwoDTO userDTO = objectMapper.readValue(message, UserHtwoDTO.class);
+//
+//        UserHtwo userHtwo = UserHtwo.builder()
+//                .name(userDTO.name())
+//                .email(userDTO.email())
+//                .build();
+//
+//        userHtwoRepository.save(userHtwo);
     }
 }
