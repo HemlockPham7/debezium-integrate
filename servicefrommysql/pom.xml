@@ -74,14 +74,22 @@
 			<groupId>io.debezium</groupId>
 			<artifactId>debezium-embedded</artifactId>
 			<version>3.2.1.Final</version>
-			<scope>test</scope>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/io.debezium/debezium-connector-postgres -->
 		<dependency>
 			<groupId>io.debezium</groupId>
-			<artifactId>debezium-connector-postgres</artifactId>
+			<artifactId>debezium-connector-mysql</artifactId>
 			<version>3.2.1.Final</version>
-			<scope>test</scope>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.json/json -->
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20240303</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
 		</dependency>
 	</dependencies>
 

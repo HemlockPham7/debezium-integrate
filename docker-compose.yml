@@ -2,21 +2,16 @@ version: '3.8'
 
 services:
   mysql:
-    image: mysql:8.0
-    container_name: debezium-poc-mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: testmysqlDB
-      MYSQL_USER: username
-      MYSQL_PASSWORD: password
+    image: quay.io/debezium/example-mysql:3.4
+    container_name: mysql
     ports:
       - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: debezium
+      MYSQL_USER: mysqluser
+      MYSQL_PASSWORD: mysqlpw
     volumes:
       - ./init_mysql.sql:/docker-entrypoint-initdb.d/init_mysql.sql
-      - mysql_data:/var/lib/mysql
-    networks:
-      - mynetwork
-
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.10
     container_name: debezium-poc-zookeeper
@@ -25,9 +20,6 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
-    networks:
-      - mynetwork
-
   kafka:
     image: confluentinc/cp-kafka:7.4.10
     container_name: debezium-poc-kafka
@@ -43,9 +35,6 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     depends_on:
       - zookeeper
-    networks:
-      - mynetwork
-
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: debezium-poc-kafka-ui
@@ -54,9 +43,17 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
     ports:
       - "9089:8080"
-    networks:
-      - mynetwork
-
-networks:
-  mynetwork:
-    driver: bridge
+  debezium:
+    image: quay.io/debezium/connect:3.4
+    container_name: debezium-poc-connect
+    ports:
+      - "8083:8083"
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9092
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: my_connect_configs
+      OFFSET_STORAGE_TOPIC: my_connect_offsets
+      STATUS_STORAGE_TOPIC: my_connect_statuses
+    depends_on:
+      - mysql
+      - kafka
